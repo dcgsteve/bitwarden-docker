@@ -1,0 +1,41 @@
+version: "3.1"
+
+services:
+
+  app:
+    image: bitwardenrs/server:latest
+    container_name: bw-app
+    restart: unless-stopped
+    ports:
+      - ${PORT}:80
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: mysql://${SQL_USER}:${SQL_PASS}@bw-db/bitwarden
+      TZ: Europe/London
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+      DOMAIN: ${URL}
+      YUBICO_CLIENT_ID: Ta0d4D
+      YUBICO_SECRET_KEY: ${YUBICO_SECRET}
+      SMTP_HOST: friday.mxlogin.com
+      SMTP_FROM: steve@devcloud.guru
+      SMTP_PORT: 587
+      SMTP_SSL: "true"
+      SMTP_USERNAME: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASS}
+      SHOW_PASSWORD_HINT: "false"
+    volumes:
+      - ${BWSTORE}/data:/data
+
+  db:
+    image: mariadb
+    container_name: bw-db
+    restart: unless-stopped
+    volumes:
+      - ${BWSTORE}/mariadb:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      MYSQL_ROOT_PASSWORD: ${SQL_ROOTPASS}
+      MYSQL_PASSWORD: ${SQL_PASS}
+      MYSQL_USER: ${SQL_USER}
+      MYSQL_DATABASE: bitwarden
